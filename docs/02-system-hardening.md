@@ -135,3 +135,28 @@ La prueba anterior forzando autenticación por contraseña devolvió `Permission
 **Locale:** conexión sin advertencias al iniciar SSH desde Mac con `LC_CTYPE=en_GB.UTF-8`. La corrección permanente en el cliente macOS no se ha aplicado o verificado.
 
 **Pendiente dentro de LAB-02:** inventario de puertos y servicios, revisión de actualizaciones, firewall, registros y políticas de respaldo. Ninguno se considera validado todavía.
+
+
+## Inventario de servicios y puertos — 21 de octubre de 2026
+
+**Fuente:** salidas facilitadas desde la Raspberry Pi real: `sudo ss -tulpen`, `systemctl list-units --type=service --state=running --no-pager`, `sudo nft list ruleset`, `apt list --upgradable`.
+
+| Elemento | Observación | Decisión |
+|---|---|---|
+| SSH | TCP/22 escucha en IPv4 `0.0.0.0` e IPv6 `[::]`; proceso `sshd` | Conservar, restringir por firewall |
+| Avahi | UDP/5353 en IPv4/IPv6 y puertos UDP efímeros asociados | Conservar temporalmente para mDNS |
+| Servicios running | 13: avahi-daemon, bluetooth, cron, dbus, getty@tty1, NetworkManager, ssh, systemd-journald, systemd-logind, systemd-timesyncd, systemd-udevd, user@1000, wpa_supplicant | No deshabilitar sin evaluación |
+| nftables | `sudo nft list ruleset` no mostró reglas | Se requiere definir política de firewall |
+| Actualizaciones | `apt list --upgradable` no mostró paquetes | Ninguno listado en ese momento; verificar frescura de índices |
+
+**Advertencia:** los sockets en escucha no demuestran exposición externa, y la ausencia de reglas nftables no descarta filtrado upstream por el router. La política SSH ya fue validada; la política de firewall sigue pendiente de implementación.
+
+### Próximo control de seguridad — firewall seguro para administración remota
+
+1. Verificar interfaz y ruta predeterminada, disponibilidad de `ufw` e IPv6; confirmar red de origen de administración.
+2. Mantener una sesión SSH por clave abierta.
+3. Definir acceso entrante SSH únicamente desde la red administrativa autorizada, permitir tráfico establecido, permitir lo requerido para mDNS y dejar tráfico saliente necesario.
+4. Habilitar el firewall solo después de revisar su configuración, y validar inmediatamente una **segunda conexión SSH** desde el Mac.
+5. Guardar `ufw status verbose` y verificar SSH/mDNS. Documentar rollback mediante sesión abierta.
+
+No considerar LAB-02 finalizado hasta validar firewall y política de actualización. No publicar identificadores únicos, credenciales o topología sensible.
