@@ -179,3 +179,19 @@ No considerar LAB-02 finalizado hasta validar firewall y política de actualizac
 - Con IPv6 habilitado, denegar nuevas conexiones entrantes IPv6 que no tengan permiso explícito.
 
 **Advertencia:** la política debe validarse en el equipo antes de marcarse completada. No copiar direcciones de hosts específicos ni secretos a un repositorio público.
+
+
+## Firewall UFW — regla preparada, activación pendiente (21 octubre 2026)
+
+El operador confirmó mediante `sudo ufw show added` que se registró la regla de gestión:
+
+```text
+ufw allow in on eth0 from 192.168.88.0/24 to any port 22 proto tcp comment 'ZN-ASSISTANT SSH ADMIN'
+Status: inactive
+```
+
+**Interpretación:** la excepción SSH está definida pero UFW sigue inactivo; por tanto todavía no se ha validado filtrado efectivo.
+
+**Próxima ejecución controlada:** verificar `grep '^IPV6=' /etc/default/ufw` y `sudo ufw show added`; asegurar política deny incoming / allow outgoing; con la sesión SSH original abierta, ejecutar `sudo ufw enable` y verificar `sudo ufw status verbose`. Abrir una segunda sesión SSH por clave desde el Mac, revisar `sudo ufw status numbered` y `systemctl is-active ssh`. Si la nueva conexión falla, desde la sesión original ejecutar `sudo ufw disable`.
+
+**Observación de alcance:** el permiso permite toda la subred administrativa 192.168.88.0/24 en `eth0`; no es una restricción a un único cliente. La aplicación del firewall no se considerará completada hasta tener evidencia de activación y nueva conexión exitosa.
