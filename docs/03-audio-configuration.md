@@ -113,3 +113,31 @@ El usuario confirmó que **Jarvis reproduce audio correctamente** después de in
 **Alcance de la evidencia:** integración salida por texto → eSpeak NG → salida analógica audible, sin micrófono ni STT. El usuario no adjuntó salida de la última batería de pruebas unitarias ni métricas de latencia, RAM o CPU; permanecen pendientes. Voz eSpeak NG provisional, no voz definitiva.
 
 **Próximo hito recomendado:** medir el consumo y latencia, verificar `python -m unittest discover -s tests -v`, después evaluar Piper TTS con un modelo ligero en español.
+
+
+## Regresión y capacidad de memoria (observado 21 de octubre de 2026)
+
+Pruebas ejecutadas por el operador: `python -m unittest discover -s tests -v` → **10 pruebas OK en 0.007 s**: 4 casos del sintetizador y 6 del motor de comandos locales.
+
+**Diferencia con 12 casos esperados:** no aparecen `test_clima_despacha_sin_red` ni `test_clima_falla_con_gracia`. Esto indica que la copia local del archivo de pruebas de clima probablemente está desactualizada; **no se debe afirmar que las 12 pruebas están aprobadas**. Volver a descargar el archivo de pruebas desde una revisión GitHub fija y verificar su contenido, luego ejecutar la batería completa.
+
+`free -h` reportado:
+
+```text
+Mem:  total 1.8Gi; used 247Mi; free 333Mi; buff/cache 1.4Gi; available 1.6Gi
+Swap: total 1.8Gi; used 0B
+```
+
+Interpretación: Linux puede recuperar buena parte de la caché; la referencia útil es **available ≈1.6 GiB**, no free. No hay consumo de swap en el momento de la medida.
+
+### Siguiente validación propuesta: compatibilidad Piper TTS
+
+Piper es un motor local de voz neuronal que puede ejecutar la síntesis en CPU; comprobar primero si existen ruedas binarias compatibles con ARM64 y Python 3.13 para evitar compilaciones grandes en Raspberry Pi de 2 GB. Procedimiento sin instalación:
+
+```bash
+cd ~/zn-assistant
+source .venv/bin/activate
+python -m pip install --dry-run --only-binary=:all: piper-tts
+```
+
+El modo `--dry-run` resuelve dependencias sin instalarlas. No reemplazar eSpeak hasta validar Piper y medir recursos. Documentación oficial: https://github.com/OHF-Voice/piper1-gpl y voces https://huggingface.co/rhasspy/piper-voices.
