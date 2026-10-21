@@ -148,3 +148,36 @@ python scripts/zn_assistant_local.py
 ```
 
 **Alcance:** no hay inteligencia generativa, STT, TTS, wake word ni ejecución de comandos del SO. La prueba de hora utiliza el reloj del sistema Raspberry. Esta fase valida únicamente el bucle conversacional, las intenciones definidas y las pruebas automatizadas. **Pendiente:** evidencia de ejecución real en Raspberry.
+
+
+## Resultados confirmados del asistente local v0.1 (21 octubre 2026)
+
+El operador ejecutó en Raspberry:
+- `hola` → saludo esperado.
+- `ayuda` → menú de comandos esperado.
+- `que hora es` → hora del reloj local de Raspberry (16:08 en la prueba).
+- `y como esta el tiempo` → respuesta controlada de intención no implementada en v0.1.
+- `salir` → término normal de sesión.
+
+La ejecución `python -m unittest discover -s tests -v` mostró **6/6 pruebas OK en 0.002 s**. Queda así validado el primer motor determinista sin llamadas a IA.
+
+### Ampliación publicada: clima v0.2 (pendiente de validación en Raspberry)
+
+Se amplió `scripts/zn_assistant_local.py` con una consulta HTTPS a Open-Meteo para las intenciones `tiempo`, `clima`, `temperatura`. El punto geográfico predeterminado son **coordenadas aproximadas del centro de Santiago**, no la ubicación del usuario. Reporta temperatura, condición, humedad y precipitación reciente, con timeout de 8 segundos y gestión de errores sin interrumpir el CLI. La hora de observación procede del servidor meteorológico.
+
+Open-Meteo no requiere API key para uso no comercial; deben respetarse sus términos y atribución: https://open-meteo.com/ y https://github.com/open-meteo/open-meteo. **A diferencia del motor local, esta función sí requiere salida HTTPS a Internet**; no consume créditos OpenAI.
+
+Se agregaron 2 pruebas unitarias con mocks (intención meteorológica y fallback por timeout). Se esperan **8 pruebas unitarias** tras descargar la actualización. Las dos nuevas pruebas no realizan conexiones a Internet.
+
+Descargar archivos de repositorio y ejecutar:
+
+```bash
+cd ~/zn-assistant
+source .venv/bin/activate
+curl -fL https://raw.githubusercontent.com/SebastianPintoSec/ZN-Assistant-RaspberryPi/main/scripts/zn_assistant_local.py -o scripts/zn_assistant_local.py
+curl -fL https://raw.githubusercontent.com/SebastianPintoSec/ZN-Assistant-RaspberryPi/main/tests/test_zn_assistant_local.py -o tests/test_zn_assistant_local.py
+python -m unittest discover -s tests -v
+python scripts/zn_assistant_local.py
+```
+
+Probar `y como esta el tiempo` y recoger salida de latencia y mensaje para diagnóstico. La nueva función aún no se ha validado en hardware ni servicio meteorológico en vivo.
