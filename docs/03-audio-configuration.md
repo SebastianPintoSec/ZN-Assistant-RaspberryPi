@@ -29,3 +29,27 @@ El operador ejecutó `lsusb`, `arecord -l` y `aplay -l`.
 - Medición de latencia y estabilidad tras reinicio.
 
 No declarar validado el módulo de voz hasta instalar y probar el hardware real.
+
+
+## Validación de salida analógica — 21 octubre 2026
+
+El operador conectó **audífonos mediante jack de 3,5 mm** a la Raspberry Pi 4 y confirmó haber escuchado el tono generado por:
+
+```bash
+speaker-test -D hw:0,0 -c 2 -t sine -f 440 -l 1
+```
+
+**Resultado:** salida ALSA analógica `hw:0,0` y reproducción física **validadas**. La prueba no valida captura de micrófono; el jack analógico integrado en la Raspberry Pi 4 es de salida y ALSA no enumera dispositivos de captura.
+
+### Siguiente prueba propuesta: síntesis de voz local (sin costo de API)
+
+```bash
+sudo apt update
+sudo apt install -y espeak-ng
+espeak-ng -v es -s 145 -w /tmp/zn-assistant-test.wav "Hola, soy ZN Assistant. Mi sistema de audio funciona correctamente."
+aplay -D plughw:0,0 /tmp/zn-assistant-test.wav
+```
+
+`espeak-ng` es un TTS local ligero y su voz puede sonar robótica; se utiliza únicamente para validar el recorrido texto → síntesis → reproducción. **Pendiente de evidencia de reproducción de voz real.**
+
+Para el asistente final se evaluará motor de voz más natural y hardware de captura USB; la elección dependerá de recursos, latencia y costo.
