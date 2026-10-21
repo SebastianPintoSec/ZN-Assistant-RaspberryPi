@@ -247,3 +247,12 @@ Mediciones registradas:
 **Interpretación:** el audio neuronal se genera y reproduce correctamente con memoria moderada y sin swap en esta prueba. Los 10.07 segundos incluyen inicialización/carga del modelo y síntesis; aún no se ha medido duración del WAV, latencia cálida ni factor de tiempo real. No declarar todavía aptitud para uso conversacional continuo. El operador todavía no ha calificado subjetivamente calidad o pronunciación.
 
 **Próxima medición recomendada:** obtener duración del WAV mediante Python `wave` y comparar tiempo de síntesis con tiempo de reproducción; después evaluar motor Piper residente y secuencias de respuestas sin recargar modelo en cada interacción. Mantener eSpeak NG como respaldo.
+
+
+## Evaluación subjetiva y relación de tiempos (21 octubre 2026)
+
+El operador midió la duración con Python `wave`: **5.94 s** para `/tmp/jarvis-piper.wav`. La ejecución completa anterior había tardado **10.07 s**, por lo que el cociente tiempo de proceso/duración del WAV es **1.70**. **No es un RTF de inferencia puro**, ya que la medida incluye inicio de intérprete, carga del modelo y escritura del archivo. La latencia perceptible real, en un servicio con modelo residente, sigue pendiente de medición.
+
+**Evaluación de escucha del operador:** la voz `es_MX-ald-medium` suena un poco mejor que eSpeak NG, pero **todavía es robótica**. La decisión es conservarla como referencia/prototipo y **mejorar en otra fase la naturalidad** con selección de voz/modelo y/o un motor de mayor calidad. No presentar esta voz como definitiva.
+
+**Siguiente prioridad:** comprobar la velocidad de síntesis con el modelo persistente en memoria antes de integrarlo al asistente de uso continuo; mantener `espeak-ng` de respaldo. Diferenciar optimización de velocidad de mejora de naturalidad.
