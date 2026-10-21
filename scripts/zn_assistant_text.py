@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ZN Assistant: prototipo conversacional de texto (sin control físico)."""
+"""Jarvis: prototipo conversacional de texto (sin control físico)."""
 
 import os
 import sys
@@ -20,7 +20,7 @@ MAX_OUTPUT_TOKENS = 250
 MAX_INPUT_CHARS = 1200
 MAX_HISTORY_ITEMS = 6  # tres intercambios previos
 SYSTEM_INSTRUCTIONS = (
-    "Eres ZN Assistant, un asistente doméstico conversacional. "
+    "Eres Jarvis, un asistente doméstico conversacional. "
     "Responde en español de Chile, de forma precisa y breve. "
     "No afirmes haber encendido equipos, consultado sensores ni realizado "
     "acciones físicas: este prototipo es únicamente de texto. "
@@ -39,7 +39,7 @@ def main() -> int:
     total_input = 0
     total_output = 0
 
-    print(f"ZN Assistant (texto) | modelo: {MODEL}")
+    print(f"Jarvis (texto) | modelo: {MODEL}")
     print("Escribe 'salir' para terminar. No introduzcas secretos.")
     while True:
         try:
@@ -90,7 +90,7 @@ def main() -> int:
         if usage:
             total_input += usage.input_tokens
             total_output += usage.output_tokens
-        print(f"ZN Assistant > {answer}")
+        print(f"Jarvis > {answer}")
         print(f"[{time.monotonic()-started:.1f}s | tokens acumulados: {total_input} entrada, {total_output} salida]")
         history = (messages + [{"role": "assistant", "content": answer}])[-MAX_HISTORY_ITEMS:]
 
