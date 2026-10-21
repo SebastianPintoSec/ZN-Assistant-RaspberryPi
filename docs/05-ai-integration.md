@@ -125,3 +125,26 @@ python scripts/zn_assistant_text.py
 La clave será válida solo en la sesión actual de shell; jamás compartirla o incluirla en `requirements.txt`, GitHub, capturas o logs. Configurar facturación y límites de cuenta en OpenAI Platform. `gpt-4.1-mini` es un identificador publicado en la documentación de modelos de la API; su acceso depende del proyecto y cuenta. Si la API devuelve un error de modelo, diagnosticar primero antes de cambiar parámetros.
 
 **Criterio de aceptación:** consulta con respuesta no vacía, error limpio al faltar credenciales, seguimiento contextual básico y contabilización de tokens. Aún sin pruebas reales en Raspberry.
+
+
+## Ruta sin facturación: asistente local v0.1 — 21 octubre 2026
+
+El usuario optó por continuar sin créditos de API mientras resuelve la aceptación del medio de pago. No se requieren clave API ni llamadas a OpenAI para esta fase.
+
+Código publicado:
+- [`scripts/zn_assistant_local.py`](../scripts/zn_assistant_local.py): CLI Python con normalización Unicode, reconocimiento determinista de intenciones (saludos, ayuda, hora local, estado, gracias) y respuesta segura ante acciones no admitidas.
+- [`tests/test_zn_assistant_local.py`](../tests/test_zn_assistant_local.py): seis pruebas unitarias de normalización, órdenes soportadas y rechazo por defecto de una acción domótica.
+
+Instalación y ejecución en Raspberry:
+
+```bash
+cd ~/zn-assistant
+source .venv/bin/activate
+mkdir -p scripts tests
+curl -fL https://raw.githubusercontent.com/SebastianPintoSec/ZN-Assistant-RaspberryPi/main/scripts/zn_assistant_local.py -o scripts/zn_assistant_local.py
+curl -fL https://raw.githubusercontent.com/SebastianPintoSec/ZN-Assistant-RaspberryPi/main/tests/test_zn_assistant_local.py -o tests/test_zn_assistant_local.py
+python -m unittest discover -s tests -v
+python scripts/zn_assistant_local.py
+```
+
+**Alcance:** no hay inteligencia generativa, STT, TTS, wake word ni ejecución de comandos del SO. La prueba de hora utiliza el reloj del sistema Raspberry. Esta fase valida únicamente el bucle conversacional, las intenciones definidas y las pruebas automatizadas. **Pendiente:** evidencia de ejecución real en Raspberry.
