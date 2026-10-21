@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ZN Assistant: prototipo local de texto sin servicios externos ni costos de API.
+"""Jarvis: prototipo local de texto sin servicios externos ni costos de API.
 
 No utiliza modelos de lenguaje: reconoce un conjunto acotado de intenciones.
 """
@@ -80,32 +80,32 @@ def reply(message: str) -> str:
     if "hora" in words:
         return f"La hora local del sistema es {datetime.now().strftime('%H:%M')}."
     if "estado" in words or "diagnostico" in words:
-        return ("ZN Assistant está ejecutándose en modo local por texto, "
+        return ("Jarvis está ejecutándose en modo local por texto, "
                 "sin IA generativa, micrófono ni control domótico.")
     if "gracias" in words:
         return "De nada. ¿Necesitas algo más?"
     if words.intersection({"hola", "buenas", "saludos"}):
-        return "Hola. Soy ZN Assistant en modo local. Escribe 'ayuda' para comenzar."
+        return "Hola. Soy Jarvis en modo local. Escribe 'ayuda' para comenzar."
     return ("Todavía no sé responder esa consulta en modo local. "
             "Escribe 'ayuda' para ver lo que sí puedo hacer.")
 
 
 def main() -> None:
-    print("ZN Assistant | MODO LOCAL | sin API de IA (clima usa Open-Meteo)")
+    print("Jarvis | MODO LOCAL | sin API de IA (clima usa Open-Meteo)")
     print("Escribe 'ayuda' o 'salir'.")
     while True:
         try:
             user_input = input("\nTú > ").strip()
         except (EOFError, KeyboardInterrupt):
-            print("\nZN Assistant > Sesión cerrada.")
+            print("\nJarvis > Sesión cerrada.")
             return
         if normalize(user_input) in {"salir", "exit", "quit"}:
-            print("ZN Assistant > Hasta luego.")
+            print("Jarvis > Hasta luego.")
             return
         if len(user_input) > 1200:
-            print("ZN Assistant > Consulta demasiado larga (máximo 1200 caracteres).")
+            print("Jarvis > Consulta demasiado larga (máximo 1200 caracteres).")
             continue
-        print(f"ZN Assistant > {reply(user_input)}")
+        print(f"Jarvis > {reply(user_input)}")
 
 
 if __name__ == "__main__":
