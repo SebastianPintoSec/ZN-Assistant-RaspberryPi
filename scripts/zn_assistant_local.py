@@ -15,6 +15,7 @@ from urllib.parse import urlencode
 from urllib.request import urlopen
 
 from jarvis_tts import speak, AudioError
+from jarvis_piper import PiperSpeaker
 
 
 def normalize(message: str) -> str:
@@ -96,10 +97,22 @@ def reply(message: str) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Jarvis: asistente local por terminal")
     parser.add_argument("--voice", action="store_true",
-                        help="Leer las respuestas con eSpeak NG por ALSA")
+                        help="Leer las respuestas mediante el motor TTS seleccionado")
     parser.add_argument("--audio-device", default="plughw:0,0",
                         help="Dispositivo ALSA (predeterminado: plughw:0,0)")
+    parser.add_argument("--tts", choices=("espeak", "piper"), default="espeak",
+                        help="Motor de voz (predeterminado: espeak)")
+    parser.add_argument("--piper-model",
+                        default="models/piper/es_MX-ald-medium.onnx",
+                        help="Ruta al modelo Piper ONNX")
     args = parser.parse_args()
+    piper_speaker = None
+    if args.voice and args.tts == "piper":
+        print("Cargando voz Piper (solo al iniciar)...")
+        try:
+            piper_speaker = PiperSpeaker(args.piper_model, device=args.audio_device)
+        except AudioError as exc:
+            print(f"[Piper no disponible: {exc}; se utilizará eSpeak NG.]")
     print("Jarvis | MODO LOCAL | sin API de IA (clima usa Open-Meteo)")
     print(f"Salida hablada: {'activada' if args.voice else 'desactivada'}")
     print("Escribe 'ayuda' o 'salir'.")
@@ -119,7 +132,14 @@ def main() -> None:
         print(f"Jarvis > {response}")
         if args.voice:
             try:
-                speak(response, device=args.audio_device)
+                if piper_speaker is not None:
+                    try:
+                        piper_speaker.speak(response)
+                    except AudioError as exc:
+                        print(f"[Piper falló: {exc}; probando eSpeak NG.]")
+                        speak(response, device=args.audio_device)
+                else:
+                    speak(response, device=args.audio_device)
             except AudioError as exc:
                 print(f"[Audio no disponible: {exc}; el modo texto continúa.]")
 
