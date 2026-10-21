@@ -70,3 +70,25 @@ python -m pip install --upgrade pip
 **Estado:** aislamiento Python y gestor pip **validados**. SDK OpenAI, API key, petición autenticada y motor conversacional **aún pendientes**.
 
 **Siguiente control:** instalar el paquete `openai` dentro del entorno virtual, guardar la versión y ejecutar una prueba de importación sin introducir secretos en comandos ni registros públicos.
+
+
+## SDK instalado y probado — 21 octubre 2026
+
+El operador confirmó:
+
+```text
+Name: openai
+Version: 3.36.0
+Location: /home/znadmin/zn-assistant/.venv/lib/python3.13/site-packages
+OpenAI SDK: 3.36.0
+```
+
+Se ejecutó `python -m pip freeze > requirements.txt` dentro del entorno virtual. **La generación local del archivo se confirmó, pero todavía no se ha publicado ni inspeccionado su contenido en el repositorio**.
+
+**Estado:** instalación e importación del SDK validadas. La llamada autenticada, las credenciales y la facturación permanecen pendientes.
+
+## Control de costos previsto
+
+La API de OpenAI factura separadamente del plan ChatGPT; para ZN Assistant, presupuestar texto (tokens entrada/salida), transcripción y voz sintetizada, y posibles búsquedas web. Ejemplos de tarifas: `gpt-6-luna` entrada US$0.10 / 1M tokens y salida US$0.50 / 1M tokens (precio estándar consultado 21 octubre 2026), `gpt-4o-mini-transcribe` ~US$0.003 / minuto; revisar página oficial antes de cada cambio de modelo: https://developers.openai.com/api/docs/pricing
+
+Controles a implementar: límite mensual de gasto en la cuenta cuando esté disponible, alertas, cupos de uso por sesión, `max_output_tokens`, instrumentación de tokens y uso de respuesta compacta; no registrar secretos ni contenido sensible.
