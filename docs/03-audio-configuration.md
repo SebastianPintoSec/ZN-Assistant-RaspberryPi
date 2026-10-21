@@ -53,3 +53,17 @@ aplay -D plughw:0,0 /tmp/zn-assistant-test.wav
 `espeak-ng` es un TTS local ligero y su voz puede sonar robótica; se utiliza únicamente para validar el recorrido texto → síntesis → reproducción. **Pendiente de evidencia de reproducción de voz real.**
 
 Para el asistente final se evaluará motor de voz más natural y hardware de captura USB; la elección dependerá de recursos, latencia y costo.
+
+
+## Síntesis local con eSpeak NG — prueba satisfactoria (21 octubre 2026)
+
+El operador instaló y probó `espeak-ng` con salida WAV y reproducción ALSA mediante:
+
+```bash
+espeak-ng -v es -s 145 -w /tmp/zn-assistant-test.wav "Hola, soy ZN Assistant. Mi sistema de audio funciona correctamente."
+aplay -D plughw:0,0 /tmp/zn-assistant-test.wav
+```
+
+**Evidencia funcional:** el usuario confirmó que escuchó la frase completa por sus audífonos jack; percibió la voz como muy robótica, comparable a un sintetizador clásico. Se valida el recorrido texto → WAV → ALSA → salida analógica. No se midieron todavía latencia, CPU ni RAM.
+
+**Decisión técnica:** conservar eSpeak NG como TTS de referencia/respaldo; evaluar Piper con modelo de voz en español para salida más natural. La viabilidad y calidad en Raspberry Pi 4 de 2 GB deben medirse, no darse por probadas. Integración de TTS con el motor conversacional y audio de entrada siguen pendientes.
