@@ -5,6 +5,7 @@ No utiliza modelos de lenguaje: reconoce un conjunto acotado de intenciones.
 """
 from __future__ import annotations
 
+import argparse
 import re
 import unicodedata
 from datetime import datetime
@@ -12,6 +13,8 @@ import json
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import urlopen
+
+from jarvis_tts import speak, AudioError
 
 
 def normalize(message: str) -> str:
@@ -91,7 +94,14 @@ def reply(message: str) -> str:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Jarvis: asistente local por terminal")
+    parser.add_argument("--voice", action="store_true",
+                        help="Leer las respuestas con eSpeak NG por ALSA")
+    parser.add_argument("--audio-device", default="plughw:0,0",
+                        help="Dispositivo ALSA (predeterminado: plughw:0,0)")
+    args = parser.parse_args()
     print("Jarvis | MODO LOCAL | sin API de IA (clima usa Open-Meteo)")
+    print(f"Salida hablada: {'activada' if args.voice else 'desactivada'}")
     print("Escribe 'ayuda' o 'salir'.")
     while True:
         try:
@@ -105,7 +115,13 @@ def main() -> None:
         if len(user_input) > 1200:
             print("Jarvis > Consulta demasiado larga (máximo 1200 caracteres).")
             continue
-        print(f"Jarvis > {reply(user_input)}")
+        response = reply(user_input)
+        print(f"Jarvis > {response}")
+        if args.voice:
+            try:
+                speak(response, device=args.audio_device)
+            except AudioError as exc:
+                print(f"[Audio no disponible: {exc}; el modo texto continúa.]")
 
 
 if __name__ == "__main__":
