@@ -92,3 +92,36 @@ Se ejecutó `python -m pip freeze > requirements.txt` dentro del entorno virtual
 La API de OpenAI factura separadamente del plan ChatGPT; para ZN Assistant, presupuestar texto (tokens entrada/salida), transcripción y voz sintetizada, y posibles búsquedas web. Ejemplos de tarifas: `gpt-6-luna` entrada US$0.10 / 1M tokens y salida US$0.50 / 1M tokens (precio estándar consultado 21 octubre 2026), `gpt-4o-mini-transcribe` ~US$0.003 / minuto; revisar página oficial antes de cada cambio de modelo: https://developers.openai.com/api/docs/pricing
 
 Controles a implementar: límite mensual de gasto en la cuenta cuando esté disponible, alertas, cupos de uso por sesión, `max_output_tokens`, instrumentación de tokens y uso de respuesta compacta; no registrar secretos ni contenido sensible.
+
+
+## Prototipo de texto v0.1 — código publicado (pendiente de validación en hardware)
+
+Archivo: [`scripts/zn_assistant_text.py`](../scripts/zn_assistant_text.py). Este programa implementa:
+- `OpenAI().responses.create` con `store=False` y modelo configurable mediante `ZN_MODEL` (predeterminado: `gpt-4.1-mini`).
+- Entrada manual por consola; ninguna entrada/salida de audio ni automatización doméstica.
+- Timeout 25 segundos, un reintento en el cliente, máximo 250 tokens de salida, máximo 1200 caracteres por entrada y retención de solo tres intercambios aproximados.
+- Manejo de errores de autenticación, cuotas, tiempo de espera y errores HTTP.
+- Visualización de latencia y tokens por sesión sin imprimir clave API. Las cifras de tokens no equivalen por sí solas a una factura.
+
+### Instalación en Raspberry (pendiente de prueba)
+
+```bash
+cd ~/zn-assistant
+source .venv/bin/activate
+mkdir -p scripts
+curl -fL https://raw.githubusercontent.com/SebastianPintoSec/ZN-Assistant-RaspberryPi/main/scripts/zn_assistant_text.py -o scripts/zn_assistant_text.py
+python -m py_compile scripts/zn_assistant_text.py
+```
+
+**Clave para prueba temporal sin persistencia:**
+
+```bash
+read -rsp "Introduce tu OpenAI API key: " OPENAI_API_KEY
+echo
+export OPENAI_API_KEY
+python scripts/zn_assistant_text.py
+```
+
+La clave será válida solo en la sesión actual de shell; jamás compartirla o incluirla en `requirements.txt`, GitHub, capturas o logs. Configurar facturación y límites de cuenta en OpenAI Platform. `gpt-4.1-mini` es un identificador publicado en la documentación de modelos de la API; su acceso depende del proyecto y cuenta. Si la API devuelve un error de modelo, diagnosticar primero antes de cambiar parámetros.
+
+**Criterio de aceptación:** consulta con respuesta no vacía, error limpio al faltar credenciales, seguimiento contextual básico y contabilización de tokens. Aún sin pruebas reales en Raspberry.
