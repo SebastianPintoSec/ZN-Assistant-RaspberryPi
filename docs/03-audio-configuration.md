@@ -225,3 +225,25 @@ aplay -D plughw:0,0 /tmp/jarvis-piper.wav
 ```
 
 Revisar salida de stderr de `time -v` para `Elapsed (wall clock) time` y `Maximum resident set size`; pedir confirmación auditiva y si se utilizó swap. **Pendiente de prueba real del motor neuronal.**
+
+
+## Primera síntesis neuronal Piper reproducida y medida (21 octubre 2026)
+
+**Evidencia del operador:** ejecución real de `es_MX-ald-medium` mediante `/usr/bin/time -v python -m piper --data-dir models/piper -m es_MX-ald-medium -f /tmp/jarvis-piper.wav -- "Hola, soy Jarvis. Mi nuevo motor de voz neuronal está funcionando correctamente."`. Se reprodujo correctamente con `aplay -D plughw:0,0 /tmp/jarvis-piper.wav`.
+
+Mediciones registradas:
+
+| Métrica | Valor |
+|---|---|
+| Tiempo de ejecución (wall clock) | 10.07 s |
+| CPU user / system | 15.16 s / 0.46 s |
+| CPU total promedio | 155 % |
+| RSS máximo | 229644 KiB (~224.3 MiB) |
+| Swaps | 0 |
+| Código de salida | 0 |
+| Archivo WAV | PCM signed 16-bit, mono, 22050 Hz |
+| Modelo | es_MX-ald-medium, archivo ONNX de 61 MB |
+
+**Interpretación:** el audio neuronal se genera y reproduce correctamente con memoria moderada y sin swap en esta prueba. Los 10.07 segundos incluyen inicialización/carga del modelo y síntesis; aún no se ha medido duración del WAV, latencia cálida ni factor de tiempo real. No declarar todavía aptitud para uso conversacional continuo. El operador todavía no ha calificado subjetivamente calidad o pronunciación.
+
+**Próxima medición recomendada:** obtener duración del WAV mediante Python `wave` y comparar tiempo de síntesis con tiempo de reproducción; después evaluar motor Piper residente y secuencias de respuestas sin recargar modelo en cada interacción. Mantener eSpeak NG como respaldo.
