@@ -97,3 +97,19 @@ Criterios de aceptación:
 El modo `--voice` **no reconoce voz**, pues aún no hay micrófono detectado; tampoco involucra OpenAI ni pagos. El motor de clima sí consulta HTTPS a Open-Meteo.
 
 **Estado:** implementación subida a GitHub, pendiente de confirmación del operador en su Raspberry.
+
+
+## Integración Jarvis → eSpeak NG → ALSA: validada (21 octubre 2026)
+
+El primer intento con `--voice` no reprodujo audio: `grep -n "audio-device" scripts/zn_assistant_local.py` no encontró el argumento y la salida omitía `Salida hablada: activada`. Se diagnosticó que el archivo local era una revisión antigua.
+
+**Corrección aplicada por el operador:** descarga directa de la revisión `1641f70e1b942522c51f06c42322ba0d72c04f4d` del archivo `scripts/zn_assistant_local.py`. El archivo actualizado se descargó con 5503 bytes y se verificaron:
+- Línea 17: `from jarvis_tts import speak, AudioError`
+- Línea 100: argumento `--audio-device`
+- Línea 104: indicador `Salida hablada`
+
+El usuario confirmó que **Jarvis reproduce audio correctamente** después de iniciar la versión actualizada con `python scripts/zn_assistant_local.py --voice`.
+
+**Alcance de la evidencia:** integración salida por texto → eSpeak NG → salida analógica audible, sin micrófono ni STT. El usuario no adjuntó salida de la última batería de pruebas unitarias ni métricas de latencia, RAM o CPU; permanecen pendientes. Voz eSpeak NG provisional, no voz definitiva.
+
+**Próximo hito recomendado:** medir el consumo y latencia, verificar `python -m unittest discover -s tests -v`, después evaluar Piper TTS con un modelo ligero en español.
