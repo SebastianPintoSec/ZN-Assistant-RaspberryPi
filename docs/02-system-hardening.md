@@ -93,3 +93,25 @@ El operador creó respaldo de `/etc/ssh/sshd_config` mediante `sudo cp -a`. El d
 **Controles de seguridad del cambio:** mantener sesión original abierta; ejecutar `sudo sshd -t`, inspeccionar `sudo sshd -T` y recargar `sudo systemctl reload ssh` solo si coincide la política. Probar autenticación pública desde una segunda terminal y rechazo de contraseña. **No marcar como aplicado hasta recibir salidas de ejecución**.
 
 **Rollback:** desde la sesión SSH que sigue abierta, ejecutar `sudo rm /etc/ssh/sshd_config.d/00-znassistant-hardening.conf && sudo sshd -t && sudo systemctl reload ssh`, solo si se necesita revertir el cambio; el respaldo previo del fichero principal se conserva. Evitar cerrar la sesión de recuperación.
+
+
+## Evidencia posterior — rechazo de contraseña (21 octubre 2026)
+
+Desde el cliente macOS se ejecutó una conexión forzando autenticación por contraseña, deshabilitando explícitamente clave pública e interacción:
+
+```bash
+ssh -o PubkeyAuthentication=no \
+  -o PreferredAuthentications=password \
+  -o KbdInteractiveAuthentication=no \
+  znadmin@<IP_PRIVADA_RASPBERRY>
+```
+
+**Salida observada:**
+
+```text
+Permission denied (publickey).
+```
+
+**Interpretación:** el servidor no ofreció autenticación por contraseña a ese cliente en esta prueba. Es una evidencia positiva de que la contraseña ya no está disponible como método SSH para esa conexión. **Pendiente**: confirmar nueva sesión por clave pública después de aplicar la política, y verificar `sudo sshd -T` con `PasswordAuthentication no`, `KbdInteractiveAuthentication no`, `PermitRootLogin no` y `PubkeyAuthentication yes`. La prohibición de root no está verificada todavía por esta prueba.
+
+No se publicaron credenciales ni direcciones IP concretas.
