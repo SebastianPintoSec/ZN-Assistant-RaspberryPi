@@ -45,3 +45,28 @@ python -m pip install --upgrade pip
 Usar paquetes de aplicación solamente dentro de `.venv`. No usar `sudo pip` ni `--break-system-packages` sobre el Python administrado por Debian (PEP 668). El entorno virtual debe estar en `.gitignore` antes de sincronizar el directorio con Git.
 
 **Estado:** se documentan versiones y ausencia de pip observadas; todavía no se recibió salida que confirme instalación de pip ni creación del entorno.
+
+
+## Entorno virtual Python — validación real (21 octubre 2026)
+
+Comandos ejecutados desde `~/zn-assistant`:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+which python
+python --version
+python -m pip --version
+python -m pip install --upgrade pip
+```
+
+**Resultados observados:**
+- Intérprete activo: `/home/znadmin/zn-assistant/.venv/bin/python`.
+- Python: `3.13.5`.
+- pip antes de actualizar: `25.1.1`.
+- pip después de actualizar: `26.2.2`.
+- Instalación de pip completada dentro de `.venv` sin errores.
+
+**Estado:** aislamiento Python y gestor pip **validados**. SDK OpenAI, API key, petición autenticada y motor conversacional **aún pendientes**.
+
+**Siguiente control:** instalar el paquete `openai` dentro del entorno virtual, guardar la versión y ejecutar una prueba de importación sin introducir secretos en comandos ni registros públicos.
