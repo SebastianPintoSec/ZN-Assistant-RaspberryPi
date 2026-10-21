@@ -160,3 +160,22 @@ La prueba anterior forzando autenticación por contraseña devolvió `Permission
 5. Guardar `ufw status verbose` y verificar SSH/mDNS. Documentar rollback mediante sesión abierta.
 
 No considerar LAB-02 finalizado hasta validar firewall y política de actualización. No publicar identificadores únicos, credenciales o topología sensible.
+
+
+## Preflight UFW — 21 octubre 2026 (observado)
+
+- `ufw`: no instalado (`command -v ufw` sin resultado).
+- Ruta por defecto: interfaz `eth0`, gateway LAN privado, dirección IPv4 privada en segmento `192.168.88.0/24`.
+- Cliente SSH actual: equipo macOS de la misma subred.
+- `/proc/sys/net/ipv6/conf/all/disable_ipv6` = `0`: IPv6 **habilitado**, por lo que las reglas de IPv6 también deben evaluarse.
+- El puerto SSH sigue siendo TCP/22. La política SSH por clave ya fue verificada.
+
+### Política inicial propuesta (no ejecutada)
+- Instalar UFW y comprobar `IPV6=yes` en `/etc/default/ufw`.
+- `ufw default deny incoming`, `ufw default allow outgoing`.
+- Permitir TCP/22 en `eth0` desde `192.168.88.0/24` como alcance inicial de gestión; **esto autoriza a toda esa LAN, no solamente al Mac**. Reducir el permiso a IP fija o VLAN administrativa cuando se definan reservas DHCP y segmentación.
+- Permitir mDNS UDP/5353 desde el segmento local únicamente si se requiere resolver `.local`; evitar interpretar eso como exposición pública.
+- Revisar `ufw status numbered` antes de habilitarlo, mantener SSH actual abierto y probar segundo SSH después de activación.
+- Con IPv6 habilitado, denegar nuevas conexiones entrantes IPv6 que no tengan permiso explícito.
+
+**Advertencia:** la política debe validarse en el equipo antes de marcarse completada. No copiar direcciones de hosts específicos ni secretos a un repositorio público.
