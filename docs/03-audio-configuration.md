@@ -141,3 +141,27 @@ python -m pip install --dry-run --only-binary=:all: piper-tts
 ```
 
 El modo `--dry-run` resuelve dependencias sin instalarlas. No reemplazar eSpeak hasta validar Piper y medir recursos. Documentación oficial: https://github.com/OHF-Voice/piper1-gpl y voces https://huggingface.co/rhasspy/piper-voices.
+
+
+## Piper TTS 1.8.0 — resolución binaria ARM64 verificada (21 octubre 2026)
+
+El operador ejecutó `python -m pip install --dry-run --only-binary=:all: piper-tts` dentro de `.venv` (Python 3.13.5 ARM64). El resolvedor descargó metadatos y reportó únicamente dependencias binarias:
+
+- `piper-tts==1.8.0`, rueda `cp39-abi3` para `aarch64`.
+- `onnxruntime==1.31.0`, rueda `cp313` para `aarch64`.
+- `numpy==2.5.4`, `pathvalidate==3.3.1`, `flatbuffers==25.12.19`, `packaging==26.3`, `protobuf==7.36.2`.
+
+**Resultado:** compatibilidad de distribución **verificada por resolución dry-run**. No prueba todavía ejecución del motor, descarga de modelos ni calidad/latencia de síntesis.
+
+### Fase siguiente: instalación y descubrimiento de voces
+
+```bash
+cd ~/zn-assistant
+source .venv/bin/activate
+python -m pip install --only-binary=:all: piper-tts==1.8.0
+python -m pip show piper-tts
+python -m pip show onnxruntime
+python -m piper.download_voices | grep -E '^es_(ES|AR|MX)-'
+```
+
+Las voces disponibles deben confirmarse antes de escoger una. Al descargar un modelo, revisar su licencia individual `MODEL_CARD` si se planea redistribuirlo. Conservar `espeak-ng` como respaldo y medir primero RAM, swap y latencia de Piper. Consultar documentación oficial https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/CLI.md y catálogo de voces https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md.
