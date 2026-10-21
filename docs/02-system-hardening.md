@@ -115,3 +115,23 @@ Permission denied (publickey).
 **Interpretación:** el servidor no ofreció autenticación por contraseña a ese cliente en esta prueba. Es una evidencia positiva de que la contraseña ya no está disponible como método SSH para esa conexión. **Pendiente**: confirmar nueva sesión por clave pública después de aplicar la política, y verificar `sudo sshd -T` con `PasswordAuthentication no`, `KbdInteractiveAuthentication no`, `PermitRootLogin no` y `PubkeyAuthentication yes`. La prohibición de root no está verificada todavía por esta prueba.
 
 No se publicaron credenciales ni direcciones IP concretas.
+
+
+## Validación definitiva de hardening SSH — 21 octubre 2026
+
+**Estado: aprobado para los controles SSH evaluados.** El operador reconectó exitosamente desde macOS usando exclusivamente la clave Ed25519 dedicada a ZN Assistant, con `IdentitiesOnly=yes`, `PreferredAuthentications=publickey` y `PasswordAuthentication=no`. La clave privada pidió su passphrase local y la sesión SSH se inició correctamente.
+
+Configuración efectiva consultada en Raspberry mediante `sudo sshd -T`:
+
+```text
+permitrootlogin no
+pubkeyauthentication yes
+passwordauthentication no
+kbdinteractiveauthentication no
+```
+
+La prueba anterior forzando autenticación por contraseña devolvió `Permission denied (publickey)`. En conjunto, se confirma acceso por clave, rechazo de contraseña, bloqueo de teclado interactivo y política de rechazo del acceso root directo, según la configuración efectiva.
+
+**Locale:** conexión sin advertencias al iniciar SSH desde Mac con `LC_CTYPE=en_GB.UTF-8`. La corrección permanente en el cliente macOS no se ha aplicado o verificado.
+
+**Pendiente dentro de LAB-02:** inventario de puertos y servicios, revisión de actualizaciones, firewall, registros y políticas de respaldo. Ninguno se considera validado todavía.
