@@ -72,3 +72,24 @@ El locale `en_GB.UTF-8` está disponible y es válido. El valor `LC_CTYPE=UTF-8`
 7. Si el acceso falla, revertir desde la sesión original; nunca cerrar el último acceso antes de la prueba.
 
 **Nota:** pasos 3–7 todavía no realizados. Confirmar otros archivos `sshd_config.d` y reglas `Match` antes de aplicar la política.
+
+
+## Diagnóstico adicional validado — 21 octubre 2026
+
+### Prueba de locale corregida
+Conexión exitosa desde macOS al utilizar `LC_CTYPE=en_GB.UTF-8` antes del comando SSH; desaparecieron las advertencias `setlocale`. La corrección persistente de la configuración del cliente sigue pendiente.
+
+### Inspección de precedencia SSH
+El operador creó respaldo de `/etc/ssh/sshd_config` mediante `sudo cp -a`. El directorio `/etc/ssh/sshd_config.d/` contenía únicamente `50-cloud-init.conf`; la inspección confirmó:
+
+```text
+/etc/ssh/sshd_config:12:Include /etc/ssh/sshd_config.d/*.conf
+/etc/ssh/sshd_config:64:KbdInteractiveAuthentication no
+/etc/ssh/sshd_config.d/50-cloud-init.conf:1:PasswordAuthentication yes
+```
+
+**Plan de cambio, todavía sin validación de ejecución:** crear `00-znassistant-hardening.conf` con `PubkeyAuthentication yes`, `PasswordAuthentication no`, `KbdInteractiveAuthentication no`, `PermitRootLogin no`. El nombre garantiza procesamiento anterior a `50-cloud-init.conf` en el include observado.
+
+**Controles de seguridad del cambio:** mantener sesión original abierta; ejecutar `sudo sshd -t`, inspeccionar `sudo sshd -T` y recargar `sudo systemctl reload ssh` solo si coincide la política. Probar autenticación pública desde una segunda terminal y rechazo de contraseña. **No marcar como aplicado hasta recibir salidas de ejecución**.
+
+**Rollback:** desde la sesión SSH que sigue abierta, ejecutar `sudo rm /etc/ssh/sshd_config.d/00-znassistant-hardening.conf && sudo sshd -t && sudo systemctl reload ssh`, solo si se necesita revertir el cambio; el respaldo previo del fichero principal se conserva. Evitar cerrar la sesión de recuperación.
