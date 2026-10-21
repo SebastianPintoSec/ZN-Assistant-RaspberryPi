@@ -165,3 +165,29 @@ python -m piper.download_voices | grep -E '^es_(ES|AR|MX)-'
 ```
 
 Las voces disponibles deben confirmarse antes de escoger una. Al descargar un modelo, revisar su licencia individual `MODEL_CARD` si se planea redistribuirlo. Conservar `espeak-ng` como respaldo y medir primero RAM, swap y latencia de Piper. Consultar documentación oficial https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/CLI.md y catálogo de voces https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md.
+
+
+## Piper instalado; nueve voces españolas descubiertas — 21 octubre 2026
+
+El operador confirmó:
+- `piper-tts==1.8.0` instalado en `.venv`, GPL-3.0-or-later.
+- `onnxruntime==1.31.0` instalado en `.venv`, licencia MIT.
+- `python -m piper.download_voices | grep -E '^es_(ES|AR|MX)-'` devolvió nueve opciones: `es_AR-daniela-high`, `es_ES-carlfm-x_low`, `es_ES-davefx-medium`, `es_ES-mls_10246-low`, `es_ES-mls_9972-low`, `es_ES-sharvard-medium`, `es_MX-ald-medium`, `es_MX-ald-x_low`, `es_MX-claude-high`.
+
+**Siguiente selección de prueba:** `es_MX-ald-medium`, calidad medium; modelo de aproximadamente 63 MB. No se ha evaluado todavía su calidad perceptual ni género de la voz. Modelo alternativo `es_ES-sharvard-medium` tiene dos perfiles de hablante identificados como M y F; valorar tras prueba.
+
+### Procedimiento de referencia (aún pendiente de prueba)
+
+```bash
+cd ~/zn-assistant
+source .venv/bin/activate
+mkdir -p models/piper
+python -m piper.download_voices --data-dir models/piper es_MX-ald-medium
+ls -lh models/piper/
+/usr/bin/time -v python -m piper --data-dir models/piper -m es_MX-ald-medium -f /tmp/jarvis-piper.wav -- "Hola, soy Jarvis. Mi nuevo motor de voz neuronal está funcionando correctamente."
+aplay -D plughw:0,0 /tmp/jarvis-piper.wav
+```
+
+**Mediciones solicitadas:** calidad audible, duración del comando, tiempo de reloj (`Elapsed (wall clock)`), y `Maximum resident set size` de `/usr/bin/time -v`. Tener en cuenta que la primera ejecución incluye carga del modelo; posterior modo residente puede ofrecer mejores tiempos. No modificar `jarvis_tts.py` ni retirar eSpeak NG hasta verificar esta primera síntesis.
+
+Referencias: https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/CLI.md ; catálogo https://huggingface.co/rhasspy/piper-voices/blob/main/voices.json
