@@ -191,3 +191,37 @@ aplay -D plughw:0,0 /tmp/jarvis-piper.wav
 **Mediciones solicitadas:** calidad audible, duración del comando, tiempo de reloj (`Elapsed (wall clock)`), y `Maximum resident set size` de `/usr/bin/time -v`. Tener en cuenta que la primera ejecución incluye carga del modelo; posterior modo residente puede ofrecer mejores tiempos. No modificar `jarvis_tts.py` ni retirar eSpeak NG hasta verificar esta primera síntesis.
 
 Referencias: https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/CLI.md ; catálogo https://huggingface.co/rhasspy/piper-voices/blob/main/voices.json
+
+
+## Modelo Piper descargado; utilidad de benchmark ausente (21 octubre 2026)
+
+El operador confirmó que `models/piper/` contiene:
+- `es_MX-ald-medium.onnx` — 61 MB.
+- `es_MX-ald-medium.onnx.json` — 4.8 KB.
+
+El primer intento de ejecución de Piper utilizó `/usr/bin/time -v`, pero el sistema devolvió:
+
+```text
+-bash: /usr/bin/time: No such file or directory
+```
+
+**Diagnóstico:** el paquete `time` no está instalado. Como falló la resolución del ejecutable externo `time`, Piper **no llegó a ejecutarse**; no existe evidencia de error de Piper ni de un WAV generado por ese intento.
+
+### Corrección y nueva prueba propuestas
+
+```bash
+sudo apt update
+sudo apt install -y time
+/usr/bin/time --version
+cd ~/zn-assistant
+source .venv/bin/activate
+/usr/bin/time -v python -m piper \
+  --data-dir models/piper \
+  -m es_MX-ald-medium \
+  -f /tmp/jarvis-piper.wav \
+  -- "Hola, soy Jarvis. Mi nuevo motor de voz neuronal está funcionando correctamente."
+ls -lh /tmp/jarvis-piper.wav
+aplay -D plughw:0,0 /tmp/jarvis-piper.wav
+```
+
+Revisar salida de stderr de `time -v` para `Elapsed (wall clock) time` y `Maximum resident set size`; pedir confirmación auditiva y si se utilizó swap. **Pendiente de prueba real del motor neuronal.**
