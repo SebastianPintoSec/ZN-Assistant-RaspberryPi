@@ -216,3 +216,27 @@ active
 **Pendiente de auditoría:** confirmar `sudo ufw status verbose` (políticas por defecto), `IPV6=yes` y reglas reales IPv6, y probar explícitamente si los servicios UDP de descubrimiento local requieren alguna excepción. No se ha comprobado desde una red ajena a la LAN, por lo que no debe inferirse una prueba de exposición externa.
 
 **Estado de fase:** SSH hardening y activación de firewall validados; revisión final de IPv6, registros y servicios pendiente.
+
+
+## Cierre de la línea base SSH/UFW — 21 de octubre de 2026
+
+### Evidencia de política efectiva
+```text
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), disabled (routed)
+22/tcp on eth0  ALLOW IN  192.168.88.0/24  # ZN-ASSISTANT SSH ADMIN
+IPV6=yes
+```
+La comprobación `sudo journalctl -u ssh -p warning --since "1 hour ago" --no-pager` devolvió `-- No entries --`.
+
+**Interpretación y alcance:**
+- La política UFW activa bloquea nuevas conexiones entrantes salvo las explícitamente permitidas, con egreso permitido.
+- El permiso SSH afecta solo a IPv4 en `eth0` desde `192.168.88.0/24`; no existe permiso explícito equivalente para IPv6.
+- `IPV6=yes` habilita el tratamiento IPv6 por UFW; no significa que se hayan probado rutas externas ni exposición IPv6.
+- La ausencia de advertencias recientes en journal no demuestra ausencia histórica de incidentes.
+- El usuario confirmó una nueva sesión SSH exitosa tras activar el firewall; la política efectiva de `sshd` y el rechazo de contraseñas ya habían sido validados.
+
+**Resultado del módulo:** línea base SSH y UFW validada. El LAB-02 mantiene tareas posteriores de monitoreo, backup, política de actualización y pruebas desde otras redes, que no bloquean el inicio del LAB-03.
+
+**Siguiente módulo:** LAB-03 audio (inventario ALSA/PipeWire y validación de dispositivo USB cuando esté disponible).
