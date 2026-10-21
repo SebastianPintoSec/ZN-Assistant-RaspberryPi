@@ -195,3 +195,24 @@ Status: inactive
 **Próxima ejecución controlada:** verificar `grep '^IPV6=' /etc/default/ufw` y `sudo ufw show added`; asegurar política deny incoming / allow outgoing; con la sesión SSH original abierta, ejecutar `sudo ufw enable` y verificar `sudo ufw status verbose`. Abrir una segunda sesión SSH por clave desde el Mac, revisar `sudo ufw status numbered` y `systemctl is-active ssh`. Si la nueva conexión falla, desde la sesión original ejecutar `sudo ufw disable`.
 
 **Observación de alcance:** el permiso permite toda la subred administrativa 192.168.88.0/24 en `eth0`; no es una restricción a un único cliente. La aplicación del firewall no se considerará completada hasta tener evidencia de activación y nueva conexión exitosa.
+
+
+## Activación UFW verificada — 21 de octubre de 2026
+
+El operador confirmó que, **después de activar UFW**, pudo abrir una **nueva sesión SSH** desde el equipo administrador e inspeccionar el firewall:
+
+```text
+sudo ufw status numbered
+Status: active
+
+[ 1] 22/tcp on eth0  ALLOW IN  192.168.88.0/24  # ZN-ASSISTANT SSH ADMIN
+
+systemctl is-active ssh
+active
+```
+
+**Resultado:** control de acceso SSH desde LAN y persistencia del servicio tras activar UFW **validados**. Este permiso comprende toda la subred administrativa `192.168.88.0/24`, no solo una estación. El rechazo de contraseñas SSH fue validado por separado; el uso de clave Ed25519 se probó tras aplicar el hardening del servicio.
+
+**Pendiente de auditoría:** confirmar `sudo ufw status verbose` (políticas por defecto), `IPV6=yes` y reglas reales IPv6, y probar explícitamente si los servicios UDP de descubrimiento local requieren alguna excepción. No se ha comprobado desde una red ajena a la LAN, por lo que no debe inferirse una prueba de exposición externa.
+
+**Estado de fase:** SSH hardening y activación de firewall validados; revisión final de IPv6, registros y servicios pendiente.
