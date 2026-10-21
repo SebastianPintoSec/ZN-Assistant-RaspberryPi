@@ -67,3 +67,33 @@ aplay -D plughw:0,0 /tmp/zn-assistant-test.wav
 **Evidencia funcional:** el usuario confirmó que escuchó la frase completa por sus audífonos jack; percibió la voz como muy robótica, comparable a un sintetizador clásico. Se valida el recorrido texto → WAV → ALSA → salida analógica. No se midieron todavía latencia, CPU ni RAM.
 
 **Decisión técnica:** conservar eSpeak NG como TTS de referencia/respaldo; evaluar Piper con modelo de voz en español para salida más natural. La viabilidad y calidad en Raspberry Pi 4 de 2 GB deben medirse, no darse por probadas. Integración de TTS con el motor conversacional y audio de entrada siguen pendientes.
+
+
+## Jarvis — integración TTS al motor local (código publicado, pruebas en Raspberry pendientes)
+
+Archivos:
+- [`scripts/jarvis_tts.py`](../scripts/jarvis_tts.py): eSpeak NG produce un WAV temporal; `aplay` lo reproduce por `plughw:0,0`; se borra después. Procesos ejecutados con argumentos separados (sin shell), timeout y manejo de errores.
+- [`scripts/zn_assistant_local.py`](../scripts/zn_assistant_local.py): `--voice` activa respuestas audibles. Sin parámetro, se conserva el modo texto. `--audio-device` permite seleccionar otro dispositivo ALSA.
+- [`tests/test_jarvis_tts.py`](../tests/test_jarvis_tts.py): pruebas de flujo TTS simuladas, texto vacío, longitud excesiva y ausencia de dependencias; no requieren audio real.
+
+### Actualización y pruebas
+
+```bash
+cd ~/zn-assistant
+source .venv/bin/activate
+curl -fL https://raw.githubusercontent.com/SebastianPintoSec/ZN-Assistant-RaspberryPi/main/scripts/zn_assistant_local.py -o scripts/zn_assistant_local.py
+curl -fL https://raw.githubusercontent.com/SebastianPintoSec/ZN-Assistant-RaspberryPi/main/scripts/jarvis_tts.py -o scripts/jarvis_tts.py
+curl -fL https://raw.githubusercontent.com/SebastianPintoSec/ZN-Assistant-RaspberryPi/main/tests/test_jarvis_tts.py -o tests/test_jarvis_tts.py
+python -m py_compile scripts/zn_assistant_local.py scripts/jarvis_tts.py
+python -m unittest discover -s tests -v
+python scripts/zn_assistant_local.py --voice
+```
+
+Criterios de aceptación:
+1. Responde por texto a `hola Jarvis` y reproduce el audio por audífonos.
+2. Si falla la reproducción, informa el error y mantiene la sesión de texto.
+3. Las pruebas unitarias muestran `OK`; con los dos tests del clima y los cuatro tests de TTS se esperan 12 pruebas en total.
+
+El modo `--voice` **no reconoce voz**, pues aún no hay micrófono detectado; tampoco involucra OpenAI ni pagos. El motor de clima sí consulta HTTPS a Open-Meteo.
+
+**Estado:** implementación subida a GitHub, pendiente de confirmación del operador en su Raspberry.
