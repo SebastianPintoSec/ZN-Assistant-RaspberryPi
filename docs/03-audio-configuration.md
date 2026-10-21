@@ -256,3 +256,36 @@ El operador midió la duración con Python `wave`: **5.94 s** para `/tmp/jarvis-
 **Evaluación de escucha del operador:** la voz `es_MX-ald-medium` suena un poco mejor que eSpeak NG, pero **todavía es robótica**. La decisión es conservarla como referencia/prototipo y **mejorar en otra fase la naturalidad** con selección de voz/modelo y/o un motor de mayor calidad. No presentar esta voz como definitiva.
 
 **Siguiente prioridad:** comprobar la velocidad de síntesis con el modelo persistente en memoria antes de integrarlo al asistente de uso continuo; mantener `espeak-ng` de respaldo. Diferenciar optimización de velocidad de mejora de naturalidad.
+
+
+## Motor Piper persistente: benchmark validado y nueva integración opcional (21 octubre 2026)
+
+Prueba del operador cargando una sola vez `PiperVoice.load("models/piper/es_MX-ald-medium.onnx")` y sintetizando dos frases consecutivas:
+- Carga inicial: **7.10 s**.
+- Síntesis 1: **1.24 s**.
+- Síntesis 2: **1.37 s**.
+- Promedio de esas dos síntesis: **1.305 s**.
+
+La reducción frente a los 10.07 s de ejecución inicial confirma que separar la carga de la síntesis es beneficioso, pero ambas pruebas utilizaron textos diferentes y no incluyen el mismo alcance de reproducción/latencia. No se ha medido aún latencia total de respuesta del asistente ni carga sostenida.
+
+Se añadieron:
+- `scripts/jarvis_piper.py`: clase `PiperSpeaker` que carga un ONNX una vez, genera un WAV temporal con `PiperVoice.synthesize_wav`, reproduce con ALSA y elimina el temporal.
+- `scripts/zn_assistant_local.py`: opción experimental `--tts piper` junto con `--voice`; conserva `--tts espeak` como predeterminado y respaldo ante fallos de Piper.
+
+**La integración está publicada, pero aún no se ha validado en la Raspberry.** No declarar el circuito Piper integrado como estable hasta escuchar varias respuestas y ejecutar la batería de pruebas.
+
+### Procedimiento propuesto
+
+Descargar por commit para evitar caché CDN:
+
+```bash
+cd ~/zn-assistant
+source .venv/bin/activate
+curl -fL "https://raw.githubusercontent.com/SebastianPintoSec/ZN-Assistant-RaspberryPi/d2cbe2e1a98a656cdc22499f95c1f18dba8c4d12/scripts/jarvis_piper.py" -o scripts/jarvis_piper.py
+curl -fL "https://raw.githubusercontent.com/SebastianPintoSec/ZN-Assistant-RaspberryPi/c106632fa1370eed9d2b2801d0d56058246dfff7/scripts/zn_assistant_local.py" -o scripts/zn_assistant_local.py
+python -m py_compile scripts/jarvis_piper.py scripts/zn_assistant_local.py
+python -m unittest discover -s tests -v
+python scripts/zn_assistant_local.py --voice --tts piper
+```
+
+Validar `hola Jarvis` y `qué hora es`; confirmar una sola carga al inicio y reproducción audible por `plughw:0,0`. eSpeak permanece como motor por defecto: `python scripts/zn_assistant_local.py --voice`.
